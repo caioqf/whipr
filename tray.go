@@ -13,6 +13,12 @@ func OnReady() {
 	systray.SetTooltip("Click to translate selection")
 
 	mTranslate := systray.AddMenuItem("Translate selected text", "Translate clipboard")
+	systray.AddSeparator()
+
+	mOptNotify := systray.AddMenuItemCheckbox("Notification", "Show translation on a notification", true)
+	mOptPopup := systray.AddMenuItemCheckbox("Popup", "Show the translation on a popup window", false)
+	systray.AddSeparator()
+
 	mQuit := systray.AddMenuItem("Exit", "Close app")
 
 	go func() {
@@ -26,8 +32,18 @@ func OnReady() {
 					selectedText = []byte("Erro ao obter seleção: " + err.Error())
 				}
 
-				exec.Command("zenity", "--info", "--text", string(selectedText)).Run()
-
+				if mOptPopup.Checked() {
+					exec.Command("zenity", "--info", "--text", string(selectedText)).Run()
+				}
+				if mOptNotify.Checked() {
+					exec.Command("notify-send", "Translation", string(selectedText)).Run()
+				}
+			case <-mOptNotify.ClickedCh:
+				mOptNotify.Check()
+				mOptPopup.Uncheck()
+			case <-mOptPopup.ClickedCh:
+				mOptPopup.Check()
+				mOptNotify.Uncheck()
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 				return
