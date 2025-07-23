@@ -1,4 +1,4 @@
-module github.com/caioqf/whispr
+module github.com/caioqf/whipr
 
 go 1.24.5
 

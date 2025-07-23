@@ -9,7 +9,7 @@ import (
 func OnReady() {
 	// icone comentado por enquanto
 	// systray.SetTemplateIcon(icon.Data, icon.Data)
-	systray.SetTitle("Whispr")
+	systray.SetTitle("whipr")
 	systray.SetTooltip("Click to translate selection")
 
 	mTranslate := systray.AddMenuItem("Translate selected text", "Translate clipboard")
