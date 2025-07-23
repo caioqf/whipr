@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/getlantern/systray"
+)
 
 func main() {
-	fmt.Println("Hello")
+	systray.Run(OnReady, OnExit)
 }
