@@ -19,14 +19,13 @@ func OnReady() {
 		for {
 			select {
 			case <-mTranslate.ClickedCh:
-				// Captura o texto selecionado usando xclip
+				// captra o texto selecionado usando
 				cmd := exec.Command("xclip", "-o", "-selection", "primary")
 				selectedText, err := cmd.Output()
 				if err != nil {
 					selectedText = []byte("Erro ao obter seleção: " + err.Error())
 				}
 
-				// Exibe o texto em um popup usando zenity
 				exec.Command("zenity", "--info", "--text", string(selectedText)).Run()
 
 			case <-mQuit.ClickedCh:
