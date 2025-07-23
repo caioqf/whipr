@@ -1,6 +1,6 @@
-# Whispr
+# Whipr
 
-**Whispr** is a simple system tray application for Linux that shows the currently selected text in a popup or notification.  
+**Whipr** is a simple system tray application for Linux that shows the currently selected text in a popup or notification.  
 Ideal for quick translation workflows or clipboard management.
 
 ---
@@ -40,9 +40,9 @@ sudo apt install xclip zenity libnotify-bin libayatana-appindicator3-dev gnome-s
 ## Build
 
 ```bash
-git clone https://github.com/caioqf/whispr.git
-cd whispr
-go build -o whispr
+git clone https://github.com/caioqf/whipr.git
+cd whipr
+go build -o whipr
 ```
 
 ---
@@ -50,7 +50,7 @@ go build -o whispr
 ## Usage
 
 ```bash
-./whispr
+./whipr
 ```
 
 - The tray icon should appear (make sure AppIndicator extension is enabled in GNOME).
@@ -63,7 +63,7 @@ go build -o whispr
 ## Troubleshooting
 
 - **No tray icon?**
-  - Make sure the AppIndicator extension is enabled in GNOME Tweaks or via `gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com`.
+  - Make sure the AppIndicator extension is enabled in GNOME Tweaks or via `gnome-extensions`
   - Restart GNOME Shell (`Alt+F2`, type `r`, press Enter).
 - **No notification?**
   - Ensure `libnotify-bin` is installed.
