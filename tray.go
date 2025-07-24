@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"net"
+	"os"
 	"os/exec"
 
 	"github.com/caioqf/whipr/assets/icon"
@@ -27,18 +30,7 @@ func OnReady() {
 		for {
 			select {
 			case <-mTranslateSelected.ClickedCh:
-				cmd := exec.Command("xclip", "-o", "-selection", "primary")
-				selectedText, err := cmd.Output()
-				if err != nil {
-					selectedText = []byte("Erro ao obter seleção: " + err.Error())
-				}
-
-				if mOptPopup.Checked() {
-					exec.Command("zenity", "--info", "--text", string(selectedText)).Run()
-				}
-				if mOptNotify.Checked() {
-					exec.Command("notify-send", "Translation", string(selectedText)).Run()
-				}
+				runTranslation(mOptPopup, mOptNotify)
 			case <-mOptNotify.ClickedCh:
 				mOptNotify.Check()
 				mOptPopup.Uncheck()
@@ -54,5 +46,45 @@ func OnReady() {
 }
 
 func OnExit() {
+	_ = os.Remove(sockPath)
+}
 
+func runTranslation(mOptPopup, mOptNotify *systray.MenuItem) {
+	cmd := exec.Command("xclip", "-o", "-selection", "primary")
+	selectedText, err := cmd.Output()
+	if err != nil {
+		selectedText = []byte("error obtaining selection: " + err.Error())
+	}
+
+	if mOptPopup.Checked() {
+		exec.Command("zenity", "--info", "--text", string(selectedText)).Run()
+	}
+	if mOptNotify.Checked() {
+		exec.Command("notify-send", "Translation", string(selectedText)).Run()
+	}
+}
+
+func startSocketServer(onTranslate func()) {
+	_ = os.Remove(sockPath)
+	ln, err := net.Listen("unix", sockPath)
+	if err != nil {
+		fmt.Println("error initiating socket", err)
+		return
+	}
+
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				continue
+			}
+			buf := make([]byte, 128)
+			n, _ := conn.Read(buf)
+			cmd := string(buf[:n])
+			if cmd == "translate" {
+				onTranslate()
+			}
+			conn.Close()
+		}
+	}()
 }
