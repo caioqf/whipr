@@ -3,20 +3,22 @@ package main
 import (
 	"os/exec"
 
+	"github.com/caioqf/whipr/assets/icon"
 	"github.com/getlantern/systray"
 )
 
 func OnReady() {
-	// icone comentado por enquanto
-	// systray.SetTemplateIcon(icon.Data, icon.Data)
-	systray.SetTitle("whipr")
+	iconBytes := icon.LoadIcon()
+	if len(iconBytes) > 0 {
+		systray.SetTemplateIcon(iconBytes, iconBytes)
+	}
 	systray.SetTooltip("Click to translate selection")
 
-	mTranslate := systray.AddMenuItem("Translate selected text", "Translate clipboard")
+	mTranslateSelected := systray.AddMenuItem("Translate selected text", "Translate clipboard")
 	systray.AddSeparator()
 
 	mOptNotify := systray.AddMenuItemCheckbox("Notification", "Show translation on a notification", true)
-	mOptPopup := systray.AddMenuItemCheckbox("Popup", "Show the translation on a popup window", false)
+	mOptPopup := systray.AddMenuItemCheckbox("Pop-Up", "Show the translation on a popup window", false)
 	systray.AddSeparator()
 
 	mQuit := systray.AddMenuItem("Exit", "Close app")
@@ -24,8 +26,7 @@ func OnReady() {
 	go func() {
 		for {
 			select {
-			case <-mTranslate.ClickedCh:
-				// captra o texto selecionado usando
+			case <-mTranslateSelected.ClickedCh:
 				cmd := exec.Command("xclip", "-o", "-selection", "primary")
 				selectedText, err := cmd.Output()
 				if err != nil {
