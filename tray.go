@@ -26,6 +26,10 @@ func OnReady() {
 
 	mQuit := systray.AddMenuItem("Exit", "Close app")
 
+	startSocketServer(func() {
+		runTranslation(mOptPopup, mOptNotify)
+	})
+
 	go func() {
 		for {
 			select {
