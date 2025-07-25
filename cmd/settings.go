@@ -38,5 +38,7 @@ func (s *AppSettings) ShouldUseNotify() bool {
 	return s.useNotify
 }
 
-func ShouldUsePopup() bool  { return settings.ShouldUsePopup() }
-func ShouldUseNotify() bool { return settings.ShouldUseNotify() }
+func ShouldUsePopup() bool          { return settings.ShouldUsePopup() }
+func ShouldUseNotify() bool         { return settings.ShouldUseNotify() }
+func SetPopupEnabled(enabled bool)  { settings.SetPopup(enabled) }
+func SetNotifyEnabled(enabled bool) { settings.SetNotify(enabled) }

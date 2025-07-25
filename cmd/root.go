@@ -49,9 +49,11 @@ func onReady() {
 					exec.Command("notify-send", "Translation", string(out)).Run()
 				}
 			case <-mPopup.ClickedCh:
+				SetPopupEnabled(true) // This updates settings AND UI
 				mPopup.Check()
 				mNotify.Uncheck()
 			case <-mNotify.ClickedCh:
+				SetNotifyEnabled(true) // This updates settings AND UI
 				mNotify.Check()
 				mPopup.Uncheck()
 			case <-mQuit.ClickedCh:
