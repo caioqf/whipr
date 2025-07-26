@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/exec"
 
@@ -15,7 +17,7 @@ var rootCmd = &cobra.Command{
 	Short: "Whipr is a tool for fast text translation",
 	Long:  `Whipr is a tool that shows translations of selected text on a shortcut pressed.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		systray.Run(onReady, func() {})
+		systray.Run(onReady, onExit)
 	},
 }
 
@@ -76,5 +78,19 @@ func Execute() {
 }
 
 func init() {
+	// Configure logging to output to both console and file
+	logFile, err := os.OpenFile("output.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Printf("Failed to open log file: %v", err)
+	} else {
+		// Create a multi-writer that writes to both file and console
+		multiWriter := io.MultiWriter(os.Stdout, logFile)
+		log.SetOutput(multiWriter)
+	}
+
+	// Initialize shortcut command flags
+	shortcutCmd.Flags().BoolVar(&usePopup, "popup", false, "Use popup display")
+	shortcutCmd.Flags().BoolVar(&useNotify, "notify", false, "Use notification display")
+
 	rootCmd.AddCommand(shortcutCmd)
 }

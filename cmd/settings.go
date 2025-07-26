@@ -1,6 +1,9 @@
 package cmd
 
-import "sync"
+import (
+	"log"
+	"sync"
+)
 
 type AppSettings struct {
 	mu        sync.RWMutex
@@ -10,9 +13,11 @@ type AppSettings struct {
 
 var settings = &AppSettings{
 	useNotify: true,
+	usePopup:  false,
 }
 
 func (s *AppSettings) SetPopup(enabled bool) {
+	log.Println("setting whipr to use popup")
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.usePopup = enabled
@@ -20,6 +25,7 @@ func (s *AppSettings) SetPopup(enabled bool) {
 }
 
 func (s *AppSettings) SetNotify(enabled bool) {
+	log.Println("setting whipr to use notification")
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.useNotify = enabled
