@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 
@@ -31,31 +32,68 @@ func onReady() {
 	mTranslate := systray.AddMenuItem("Translate selected text", "Translate selected text")
 	systray.AddSeparator()
 
-	mPopup := systray.AddMenuItemCheckbox("Popup", "Use popup", false)
-	mNotify := systray.AddMenuItemCheckbox("Notify", "Use notify", true)
+	mPopup := systray.AddMenuItemCheckbox("Popup", "Use popup", ShouldUsePopup())
+	mNotify := systray.AddMenuItemCheckbox("Notify", "Use notify", ShouldUseNotify())
 
 	mQuit := systray.AddMenuItem("Exit", "Quit")
+
+	doTranslate := func() {
+		out, err := exec.Command("xclip", "-o", "-selection", "primary").Output()
+		if err != nil {
+			out = []byte("Error getting selection: " + err.Error())
+		}
+		if mPopup.Checked() {
+			exec.Command("zenity", "--info", "--text", string(out)).Run()
+		}
+		if mNotify.Checked() {
+			exec.Command("notify-send", "Translation", string(out)).Run()
+		}
+	}
+
+	go func() {
+		if err := os.Remove("/tmp/whipr.sock"); err != nil && !os.IsNotExist(err) {
+			log.Printf("Error removing socket: %v", err)
+		}
+		listener, err := net.Listen("unix", "/tmp/whipr.sock")
+		if err != nil {
+			log.Printf("Failed to listen on socket: %v", err)
+			return
+		}
+		defer listener.Close()
+		log.Println("Listening on /tmp/whipr.sock")
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				log.Printf("Accept error: %v", err)
+				continue
+			}
+			go func(c net.Conn) {
+				defer c.Close()
+				buf := make([]byte, 512)
+				n, err := c.Read(buf)
+				if err != nil {
+					log.Printf("Read error: %v", err)
+					return
+				}
+				msg := string(buf[:n])
+				if msg == "translate" {
+					doTranslate()
+				}
+			}(conn)
+		}
+	}()
 
 	go func() {
 		for {
 			select {
 			case <-mTranslate.ClickedCh:
-				out, err := exec.Command("xclip", "-o", "-selection", "primary").Output()
-				if err != nil {
-					out = []byte("Error getting selection: " + err.Error())
-				}
-				if mPopup.Checked() {
-					exec.Command("zenity", "--info", "--text", string(out)).Run()
-				}
-				if mNotify.Checked() {
-					exec.Command("notify-send", "Translation", string(out)).Run()
-				}
+				doTranslate()
 			case <-mPopup.ClickedCh:
-				SetPopupEnabled(true) // This updates settings AND UI
+				SetPopupEnabled(true)
 				mPopup.Check()
 				mNotify.Uncheck()
 			case <-mNotify.ClickedCh:
-				SetNotifyEnabled(true) // This updates settings AND UI
+				SetNotifyEnabled(true)
 				mNotify.Check()
 				mPopup.Uncheck()
 			case <-mQuit.ClickedCh:
