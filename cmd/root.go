@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"os"
@@ -34,20 +33,19 @@ func onReady() {
 
 	mPopup := systray.AddMenuItemCheckbox("Popup", "Use popup", ShouldUsePopup())
 	mNotify := systray.AddMenuItemCheckbox("Notify", "Use notify", ShouldUseNotify())
+	systray.AddSeparator()
 
-	mQuit := systray.AddMenuItem("Exit", "Quit")
+	mSettings := systray.AddMenuItem("Settings", "Settings")
+	systray.AddSeparator()
+
+	mQuit := systray.AddMenuItem("Quit Whipr", "Quit Whipr")
 
 	doTranslate := func() {
 		out, err := exec.Command("xclip", "-o", "-selection", "primary").Output()
 		if err != nil {
 			out = []byte("Error getting selection: " + err.Error())
 		}
-		if mPopup.Checked() {
-			exec.Command("zenity", "--info", "--text", string(out)).Run()
-		}
-		if mNotify.Checked() {
-			exec.Command("notify-send", "Translation", string(out)).Run()
-		}
+		DisplayTranslated(string(out))
 	}
 
 	go func() {
@@ -99,6 +97,8 @@ func onReady() {
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 				return
+			case <-mSettings.ClickedCh:
+				// openSettings()
 			}
 		}
 	}()
@@ -116,16 +116,6 @@ func Execute() {
 }
 
 func init() {
-	// Configure logging to output to both console and file
-	logFile, err := os.OpenFile("output.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Printf("Failed to open log file: %v", err)
-	} else {
-		// Create a multi-writer that writes to both file and console
-		multiWriter := io.MultiWriter(os.Stdout, logFile)
-		log.SetOutput(multiWriter)
-	}
-
 	// Initialize shortcut command flags
 	shortcutCmd.Flags().BoolVar(&usePopup, "popup", false, "Use popup display")
 	shortcutCmd.Flags().BoolVar(&useNotify, "notify", false, "Use notification display")

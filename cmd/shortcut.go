@@ -27,24 +27,14 @@ var shortcutCmd = &cobra.Command{
 
 		log.Printf("Clipboard content: %q", string(output))
 
-		// Use flags if provided, otherwise fall back to settings
-		shouldUseNotify := useNotify || (!usePopup && ShouldUseNotify())
-		shouldUsePopup := usePopup || (!useNotify && ShouldUsePopup())
+		if usePopup {
+			SetPopupEnabled(true)
+		}
+		if useNotify {
+			SetNotifyEnabled(true)
+		}
 
-		if shouldUseNotify {
-			log.Println("Using notification display")
-			err := exec.Command("notify-send", "Translation", string(output)).Run()
-			if err != nil {
-				log.Printf("notify-send error: %v", err)
-			}
-		}
-		if shouldUsePopup {
-			log.Println("Using popup display")
-			err := exec.Command("zenity", "--info", "--text", string(output)).Run()
-			if err != nil {
-				log.Printf("zenity error: %v", err)
-			}
-		}
+		DisplayTranslated(string(output))
 
 		log.Println("Shortcut command completed")
 	},
