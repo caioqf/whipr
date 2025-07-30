@@ -29,7 +29,6 @@ func LoadSettings() {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			// Save defaults if file doesn't exist
 			saveSettings()
 			return
 		}
