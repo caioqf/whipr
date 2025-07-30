@@ -69,7 +69,6 @@ func saveSettings() {
 		log.Printf("Failed to marshal settings: %v", err)
 		return
 	}
-	log.Printf("Saving settings: %v", data)
 
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		log.Printf("Failed to write settings: %v", err)
