@@ -10,13 +10,13 @@ import (
 
 type AppSettings struct {
 	mu        sync.RWMutex
-	usePopup  bool
-	useNotify bool
+	UsePopup  bool
+	UseNotify bool
 }
 
 var settings = &AppSettings{
-	useNotify: true,
-	usePopup:  false,
+	UseNotify: false,
+	UsePopup:  true,
 }
 
 func LoadSettings() {
@@ -39,16 +39,16 @@ func LoadSettings() {
 		return
 	}
 	settings.mu.Lock()
-	settings.usePopup = loaded.usePopup
-	settings.useNotify = loaded.useNotify
+	settings.UsePopup = loaded.UsePopup
+	settings.UseNotify = loaded.UseNotify
 	settings.mu.Unlock()
 }
 
 func saveSettings() {
 	settings.mu.RLock()
 	toSave := AppSettings{
-		usePopup:  settings.usePopup,
-		useNotify: settings.useNotify,
+		UsePopup:  settings.UsePopup,
+		UseNotify: settings.UseNotify,
 	}
 	settings.mu.RUnlock()
 	home, err := os.UserHomeDir()
@@ -67,25 +67,25 @@ func saveSettings() {
 		log.Printf("Failed to marshal settings: %v", err)
 		return
 	}
+	log.Printf("Saving settings: %v", data)
+
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		log.Printf("Failed to write settings: %v", err)
 	}
 }
 
 func (s *AppSettings) SetPopup(enabled bool) {
-	log.Println("setting whipr to use popup")
 	s.mu.Lock()
-	s.usePopup = enabled
-	s.useNotify = !enabled
+	s.UsePopup = enabled
+	s.UseNotify = !enabled
 	s.mu.Unlock()
 	saveSettings()
 }
 
 func (s *AppSettings) SetNotify(enabled bool) {
-	log.Println("setting whipr to use notification")
 	s.mu.Lock()
-	s.useNotify = enabled
-	s.usePopup = !enabled
+	s.UseNotify = enabled
+	s.UsePopup = !enabled
 	s.mu.Unlock()
 	saveSettings()
 }
@@ -93,13 +93,13 @@ func (s *AppSettings) SetNotify(enabled bool) {
 func (s *AppSettings) ShouldUsePopup() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.usePopup
+	return s.UsePopup
 }
 
 func (s *AppSettings) ShouldUseNotify() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.useNotify
+	return s.UseNotify
 }
 
 func ShouldUsePopup() bool          { return settings.ShouldUsePopup() }
