@@ -28,9 +28,12 @@ func LoadSettings() {
 	configPath := filepath.Join(home, ".config", "whipr", "settings.json")
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			log.Printf("Failed to read settings: %v", err)
+		if os.IsNotExist(err) {
+			// Save defaults if file doesn't exist
+			saveSettings()
+			return
 		}
+		log.Printf("Failed to read settings: %v", err)
 		return
 	}
 	var loaded AppSettings
