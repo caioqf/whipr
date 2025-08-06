@@ -9,20 +9,24 @@ import (
 )
 
 type AppSettings struct {
-	mu        sync.RWMutex
-	UsePopup  bool
-	UseNotify bool
+	mu             sync.RWMutex
+	UsePopup       bool
+	UseNotify      bool
+	DetectLanguage bool
 
-	APIProvider string `json:"api_provider"`
-	APIKey      string `json:"api_key"`
-	Model       string `json:"model"`
+	LanguageProfiles []LanguageProfile `json:"language_profiles"`
+	APIProvider      string            `json:"api_provider"`
+	APIKey           string            `json:"api_key"`
+	Model            string            `json:"model"`
 
-	QuickLangs []string `json:"quick_langs"`
+	Profiles   []LanguageProfile `json:"profiles"`
+	QuickLangs []string          `json:"quick_langs"`
 
 	Shortcut string
 }
 
 type LanguageProfile struct {
+	Name           string `json:"name"`
 	SourceLanguage string `json:"source_language"`
 	TargetLanguage string `json:"target_language"`
 	Active         bool   `json:"active"`
@@ -31,6 +35,21 @@ type LanguageProfile struct {
 var settings = &AppSettings{
 	UseNotify: false,
 	UsePopup:  true,
+
+	DetectLanguage: true,
+	APIProvider:    "openai",
+	Model:          "gpt-3.5-turbo",
+	APIKey:         "",
+	QuickLangs:     []string{"en", "pt"},
+	Shortcut:       "ctrl+shift+t",
+	Profiles: []LanguageProfile{
+		{
+			Name:           "Default",
+			SourceLanguage: "en",
+			TargetLanguage: "pt",
+			Active:         true,
+		},
+	},
 }
 
 func LoadSettings() {
