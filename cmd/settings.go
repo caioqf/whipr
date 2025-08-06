@@ -12,6 +12,20 @@ type AppSettings struct {
 	mu        sync.RWMutex
 	UsePopup  bool
 	UseNotify bool
+
+	APIProvider string `json:"api_provider"`
+	APIKey      string `json:"api_key"`
+	Model       string `json:"model"`
+
+	QuickLangs []string `json:"quick_langs"`
+
+	Shortcut string
+}
+
+type LanguageProfile struct {
+	SourceLanguage string `json:"source_language"`
+	TargetLanguage string `json:"target_language"`
+	Active         bool   `json:"active"`
 }
 
 var settings = &AppSettings{
