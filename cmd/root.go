@@ -32,7 +32,7 @@ func onReady() {
 	systray.AddSeparator()
 
 	mPopup := systray.AddMenuItemCheckbox("Popup", "Use popup", ShouldUsePopup())
-	mNotify := systray.AddMenuItemCheckbox("Notify", "Use notify", ShouldUseNotify())
+	mNotify := systray.AddMenuItemCheckbox("Notify", "Use notify", ShouldUseNotification())
 	systray.AddSeparator()
 
 	mSettings := systray.AddMenuItem("Settings", "Settings")
@@ -91,7 +91,7 @@ func onReady() {
 				mPopup.Check()
 				mNotify.Uncheck()
 			case <-mNotify.ClickedCh:
-				SetNotifyEnabled(true)
+				SetNotificationEnabled(true)
 				mNotify.Check()
 				mPopup.Uncheck()
 			case <-mQuit.ClickedCh:

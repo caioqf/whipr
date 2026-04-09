@@ -35,7 +35,7 @@ func DisplayTranslated(text string) {
 			log.Printf("zenity error: %v", err)
 		}
 	}
-	if ShouldUseNotify() {
+	if ShouldUseNotification() {
 		log.Println("Using notification display")
 		err := exec.Command("notify-send", "Translation", translated).Run()
 		if err != nil {

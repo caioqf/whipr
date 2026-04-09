@@ -4,4 +4,5 @@
 *.log
 /tmp
 /bin
-whipr
+whiprs
+.claude

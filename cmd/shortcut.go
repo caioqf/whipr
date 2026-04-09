@@ -31,7 +31,7 @@ var shortcutCmd = &cobra.Command{
 			SetPopupEnabled(true)
 		}
 		if useNotify {
-			SetNotifyEnabled(true)
+			SetNotificationEnabled(true)
 		}
 
 		DisplayTranslated(string(output))

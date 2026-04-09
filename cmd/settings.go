@@ -10,46 +10,30 @@ import (
 
 type AppSettings struct {
 	mu             sync.RWMutex
-	UsePopup       bool
-	UseNotify      bool
-	DetectLanguage bool
+	UsePopup       bool               `json:"use_popup"`
+	UseNotification      bool               `json:"use_notification"`
+	DetectLanguage bool               `json:"detect_language"`
 
-	LanguageProfiles []LanguageProfile `json:"language_profiles"`
 	APIProvider      string            `json:"api_provider"`
 	APIKey           string            `json:"api_key"`
 	Model            string            `json:"model"`
 
-	Profiles   []LanguageProfile `json:"profiles"`
 	QuickLangs []string          `json:"quick_langs"`
-
-	Shortcut string
+	Shortcut string             `json:"shortcut"`
 }
 
-type LanguageProfile struct {
-	Name           string `json:"name"`
-	SourceLanguage string `json:"source_language"`
-	TargetLanguage string `json:"target_language"`
-	Active         bool   `json:"active"`
-}
 
 var settings = &AppSettings{
-	UseNotify: false,
-	UsePopup:  true,
-
+	UsePopup:  false,
+	UseNotification: true,
 	DetectLanguage: true,
+	
 	APIProvider:    "openai",
-	Model:          "gpt-3.5-turbo",
 	APIKey:         "",
-	QuickLangs:     []string{"en", "pt"},
+	Model:          "gpt-3.5-turbo",
+	
+	QuickLangs:     []string{"en", "pt", "es", "fr", "jp", "ch"},
 	Shortcut:       "ctrl+shift+t",
-	Profiles: []LanguageProfile{
-		{
-			Name:           "Default",
-			SourceLanguage: "en",
-			TargetLanguage: "pt",
-			Active:         true,
-		},
-	},
 }
 
 func LoadSettings() {
@@ -75,7 +59,7 @@ func LoadSettings() {
 	}
 	settings.mu.Lock()
 	settings.UsePopup = loaded.UsePopup
-	settings.UseNotify = loaded.UseNotify
+	settings.UseNotification = loaded.UseNotification
 	settings.mu.Unlock()
 }
 
@@ -83,7 +67,7 @@ func saveSettings() {
 	settings.mu.RLock()
 	toSave := AppSettings{
 		UsePopup:  settings.UsePopup,
-		UseNotify: settings.UseNotify,
+		UseNotification: settings.UseNotification,
 	}
 	settings.mu.RUnlock()
 	home, err := os.UserHomeDir()
@@ -111,14 +95,14 @@ func saveSettings() {
 func (s *AppSettings) SetPopup(enabled bool) {
 	s.mu.Lock()
 	s.UsePopup = enabled
-	s.UseNotify = !enabled
+	s.UseNotification = !enabled
 	s.mu.Unlock()
 	saveSettings()
 }
 
-func (s *AppSettings) SetNotify(enabled bool) {
+func (s *AppSettings) SetNotification(enabled bool) {
 	s.mu.Lock()
-	s.UseNotify = enabled
+	s.UseNotification = enabled
 	s.UsePopup = !enabled
 	s.mu.Unlock()
 	saveSettings()
@@ -130,13 +114,13 @@ func (s *AppSettings) ShouldUsePopup() bool {
 	return s.UsePopup
 }
 
-func (s *AppSettings) ShouldUseNotify() bool {
+func (s *AppSettings) ShouldUseNotification() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.UseNotify
+	return s.UseNotification
 }
 
 func ShouldUsePopup() bool          { return settings.ShouldUsePopup() }
-func ShouldUseNotify() bool         { return settings.ShouldUseNotify() }
+func ShouldUseNotification() bool         { return settings.ShouldUseNotification() }
 func SetPopupEnabled(enabled bool)  { settings.SetPopup(enabled) }
-func SetNotifyEnabled(enabled bool) { settings.SetNotify(enabled) }
+func SetNotificationEnabled(enabled bool) { settings.SetNotification(enabled) }
