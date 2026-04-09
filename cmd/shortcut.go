@@ -34,8 +34,6 @@ var shortcutCmd = &cobra.Command{
 			SetNotificationEnabled(true)
 		}
 
-		DisplayTranslated(string(output))
-
 		log.Println("Shortcut command completed")
 	},
 }

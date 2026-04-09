@@ -5,17 +5,17 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
 
 	"github.com/caioqf/whipr/assets/icon"
+	"github.com/caioqf/whipr/internal"
 	"github.com/getlantern/systray"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "whipr",
-	Short: "Whipr is a tool for fast text translation",
-	Long:  `Whipr is a tool that shows translations of selected text on a shortcut pressed.`,
+	Short: "Whipr is a tool for fast A.I assistant, text translation, clipboard management",
+	Long:  `Whipr is a tool that shows translations of selected text on a shortcut pressed. It also provides a A.I assistant, text translation, and clipboard management.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		systray.Run(onReady, onExit)
 	},
@@ -39,14 +39,6 @@ func onReady() {
 	systray.AddSeparator()
 
 	mQuit := systray.AddMenuItem("Quit Whipr", "Quit Whipr")
-
-	doTranslate := func() {
-		out, err := exec.Command("xclip", "-o", "-selection", "primary").Output()
-		if err != nil {
-			out = []byte("Error getting selection: " + err.Error())
-		}
-		DisplayTranslated(string(out))
-	}
 
 	go func() {
 		if err := os.Remove("/tmp/whipr.sock"); err != nil && !os.IsNotExist(err) {
@@ -75,7 +67,12 @@ func onReady() {
 				}
 				msg := string(buf[:n])
 				if msg == "translate" {
-					doTranslate()
+					log.Println("Translate selected text")
+					renderNotification(Notification{
+						Title:   "Translate selected text",
+						Message: string(buf[:n]),
+						Icon:    "whipr",
+					})
 				}
 			}(conn)
 		}
@@ -85,7 +82,17 @@ func onReady() {
 		for {
 			select {
 			case <-mTranslate.ClickedCh:
-				doTranslate()
+				title := "Translation Completed."
+				message, err := internal.DefaultReader().Read()
+				if err != nil {
+					log.Printf("clipboard: %v", err)
+				}
+
+				renderNotification(Notification{
+					Title:   title,
+					Message: message,
+					Icon:    "whipr",
+				})
 			case <-mPopup.ClickedCh:
 				SetPopupEnabled(true)
 				mPopup.Check()
