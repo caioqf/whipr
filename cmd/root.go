@@ -1,13 +1,15 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
 
 	"github.com/caioqf/whipr/assets/icon"
-	"github.com/caioqf/whipr/internal"
+	"github.com/caioqf/whipr/internal/clipboard"
+	"github.com/caioqf/whipr/internal/selection"
 	"github.com/getlantern/systray"
 	"github.com/spf13/cobra"
 )
@@ -83,9 +85,15 @@ func onReady() {
 			select {
 			case <-mTranslate.ClickedCh:
 				title := "Translation Completed."
-				message, err := internal.DefaultReader().Read()
-				if err != nil {
-					log.Printf("clipboard: %v", err)
+				message, err := selection.DefaultSelectionReader().Read()
+				if err != nil && !errors.Is(err, selection.ErrNoSelection) {
+					log.Printf("selection: %v", err)
+				}
+				if message == "" {
+					message, err = clipboard.DefaultReader().Read()
+					if err != nil {
+						log.Printf("clipboard: %v", err)
+					}
 				}
 
 				renderNotification(Notification{
